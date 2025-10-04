@@ -140,8 +140,9 @@ npm run dev
    - Set the following configuration:
      - **Name**: ngo-project-api (or your preferred name)
      - **Environment**: Node
-     - **Build Command**: `npm install`
+     - **Build Command**: `npm run build` (or `npm install`)
      - **Start Command**: `npm start`
+     - **Publish directory**: (leave empty - this is for static sites)
      - **Plan**: Free (for testing) or paid for production
 
 3. **Environment Variables** (in Render dashboard):
