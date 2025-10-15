@@ -23,7 +23,7 @@ describe('Events API - GET Endpoints', () => {
 
   describe('GET /events', () => {
     it('should return all events with populated organizer info', async () => {
-      const organizerId = new mongoose.Types.ObjectId();
+      const testOrganizerId = new mongoose.Types.ObjectId();
       const mockEvents = [
         {
           _id: new mongoose.Types.ObjectId(),
@@ -32,7 +32,7 @@ describe('Events API - GET Endpoints', () => {
           date: new Date('2024-12-01'),
           endDate: new Date('2024-12-01'),
           location: 'Grand Hotel',
-          organizerId: organizerId,
+          organizerId: testOrganizerId.toString(),
           type: 'fundraiser',
           status: 'planned',
           maxAttendees: 200,
@@ -49,7 +49,7 @@ describe('Events API - GET Endpoints', () => {
           date: new Date('2024-11-15'),
           endDate: new Date('2024-11-15'),
           location: 'Community Center',
-          organizerId: organizerId,
+          organizerId: testOrganizerId.toString(),
           type: 'workshop',
           status: 'active',
           maxAttendees: 50,
@@ -131,7 +131,7 @@ describe('Events API - GET Endpoints', () => {
         {
           _id: new mongoose.Types.ObjectId(),
           name: 'Fundraising Gala',
-          organizerId: organizerId,
+          organizerId: testOrganizerId.toString(),
           type: 'fundraiser',
           status: 'planned'
         }

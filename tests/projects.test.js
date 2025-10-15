@@ -23,7 +23,7 @@ describe('Projects API - GET Endpoints', () => {
 
   describe('GET /projects', () => {
     it('should return all projects with populated manager info', async () => {
-      const managerId = new mongoose.Types.ObjectId();
+      const testManagerId = new mongoose.Types.ObjectId();
       const mockProjects = [
         {
           _id: new mongoose.Types.ObjectId(),
@@ -34,7 +34,7 @@ describe('Projects API - GET Endpoints', () => {
           budget: 10000,
           targetAmount: 15000,
           status: 'active',
-          managerId: managerId,
+          managerId: testManagerId.toString(),
           category: 'education',
           createdAt: new Date(),
           updatedAt: new Date()
@@ -48,7 +48,7 @@ describe('Projects API - GET Endpoints', () => {
           budget: 20000,
           targetAmount: 25000,
           status: 'planning',
-          managerId: managerId,
+          managerId: testManagerId.toString(),
           category: 'healthcare',
           createdAt: new Date(),
           updatedAt: new Date()

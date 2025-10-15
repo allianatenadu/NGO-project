@@ -23,11 +23,12 @@ describe('Donations API - GET Endpoints', () => {
 
   describe('GET /donations', () => {
     it('should return all donations with populated donor info', async () => {
+      const testDonorId = new mongoose.Types.ObjectId();
       const mockDonations = [
         {
           _id: new mongoose.Types.ObjectId(),
           amount: 100,
-          donorId: new mongoose.Types.ObjectId(),
+          donorId: testDonorId.toString(),
           projectId: 'project1',
           status: 'completed',
           createdAt: new Date(),
@@ -36,7 +37,7 @@ describe('Donations API - GET Endpoints', () => {
         {
           _id: new mongoose.Types.ObjectId(),
           amount: 250,
-          donorId: new mongoose.Types.ObjectId(),
+          donorId: testDonorId.toString(),
           projectId: 'project2',
           status: 'pending',
           createdAt: new Date(),

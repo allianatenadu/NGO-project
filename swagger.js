@@ -178,6 +178,83 @@ const options = {
             },
           },
         },
+        Event: {
+          type: "object",
+          required: ["name", "description", "date", "endDate", "location", "organizerId", "type", "registrationDeadline"],
+          properties: {
+            _id: {
+              type: "string",
+              description: "Unique identifier for the event",
+            },
+            name: {
+              type: "string",
+              description: "Event name",
+            },
+            description: {
+              type: "string",
+              description: "Event description",
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              description: "Event start date",
+            },
+            endDate: {
+              type: "string",
+              format: "date-time",
+              description: "Event end date",
+            },
+            location: {
+              type: "string",
+              description: "Event location",
+            },
+            organizerId: {
+              type: "string",
+              description: "ID of the event organizer",
+            },
+            type: {
+              type: "string",
+              enum: ["fundraiser", "volunteer", "workshop", "conference", "community", "awareness", "other"],
+              description: "Event type",
+            },
+            status: {
+              type: "string",
+              enum: ["planned", "active", "completed", "cancelled", "postponed"],
+              description: "Event status",
+            },
+            maxAttendees: {
+              type: "number",
+              minimum: 1,
+              maximum: 10000,
+              description: "Maximum number of attendees",
+            },
+            currentAttendees: {
+              type: "number",
+              minimum: 0,
+              description: "Current number of attendees",
+            },
+            registrationDeadline: {
+              type: "string",
+              format: "date-time",
+              description: "Registration deadline",
+            },
+            entryFee: {
+              type: "number",
+              minimum: 0,
+              description: "Entry fee amount",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Event creation date",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Event last update date",
+            },
+          },
+        },
         Error: {
           type: "object",
           properties: {
