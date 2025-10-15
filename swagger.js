@@ -65,6 +65,128 @@ const options = {
             },
           },
         },
+        Project: {
+          type: "object",
+          required: ["name", "description", "startDate", "endDate", "budget", "targetAmount", "managerId", "category"],
+          properties: {
+            _id: {
+              type: "string",
+              description: "Unique identifier for the project",
+            },
+            name: {
+              type: "string",
+              description: "Project name",
+            },
+            description: {
+              type: "string",
+              description: "Project description",
+            },
+            startDate: {
+              type: "string",
+              format: "date",
+              description: "Project start date",
+            },
+            endDate: {
+              type: "string",
+              format: "date",
+              description: "Project end date",
+            },
+            budget: {
+              type: "number",
+              minimum: 0,
+              description: "Project budget",
+            },
+            targetAmount: {
+              type: "number",
+              minimum: 0,
+              description: "Target fundraising amount",
+            },
+            status: {
+              type: "string",
+              enum: ["planning", "active", "on-hold", "completed", "cancelled"],
+              description: "Project status",
+            },
+            managerId: {
+              type: "string",
+              description: "ID of the project manager",
+            },
+            location: {
+              type: "string",
+              description: "Project location",
+            },
+            category: {
+              type: "string",
+              enum: ["education", "healthcare", "environment", "community", "emergency", "other"],
+              description: "Project category",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Project creation date",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Project last update date",
+            },
+          },
+        },
+        Donation: {
+          type: "object",
+          required: ["amount", "donorId", "projectId"],
+          properties: {
+            _id: {
+              type: "string",
+              description: "Unique identifier for the donation",
+            },
+            amount: {
+              type: "number",
+              minimum: 1,
+              description: "Donation amount",
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              description: "Donation date",
+            },
+            donorId: {
+              type: "string",
+              description: "ID of the donor (User)",
+            },
+            projectId: {
+              type: "string",
+              description: "ID of the project being donated to",
+            },
+            description: {
+              type: "string",
+              description: "Optional donation description",
+            },
+            status: {
+              type: "string",
+              enum: ["pending", "completed", "cancelled"],
+              description: "Donation status",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Donation creation date",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Donation last update date",
+            },
+          },
+        },
+        Error: {
+          type: "object",
+          properties: {
+            error: {
+              type: "string",
+              description: "Error message",
+            },
+          },
+        },
       },
     },
     security: [
