@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -18,6 +19,12 @@ const UserSchema = new mongoose.Schema({
       'Please provide a valid email'
     ]
   },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters long'],
+    select: false // Don't include password in queries by default
+  },
   role: {
     type: String,
     enum: {
@@ -36,10 +43,30 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
+// Hash password before saving
+UserSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('password')) return next();
+
+  try {
+    // Hash password with cost of 12
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Update the updatedAt field before saving
 UserSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+// Instance method to compare password
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = mongoose.model('User', UserSchema);

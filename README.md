@@ -1,15 +1,19 @@
 # NGO Project API
 
-A Node.js Express API for managing NGO users and donations with comprehensive Swagger documentation.
+A Node.js Express API for managing NGO users, donations, projects, and events with comprehensive Swagger documentation and OAuth authentication.
 
 ## Features
 
 - **User Management**: Create, read, update, and delete users with role-based access (donor, volunteer, admin)
 - **Donation Tracking**: Manage donations with donor relationships and project associations
+- **Project Management**: Create and manage NGO projects with budgets, timelines, and categories
+- **Event Management**: Organize and track fundraising events, workshops, and volunteer activities
+- **OAuth Authentication**: JWT-based authentication with role-based access control
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes
 - **API Documentation**: Interactive Swagger UI documentation at `/api-docs`
 - **MongoDB Integration**: Mongoose ODM for database operations
 - **CORS Support**: Cross-origin resource sharing enabled
+- **Testing Suite**: Comprehensive unit tests with Jest and in-memory database
 
 ## Tech Stack
 
@@ -45,6 +49,10 @@ NODE_ENV=development
 
 ## API Endpoints
 
+### Authentication
+- `POST /auth/login` - User login (returns JWT token)
+- `GET /auth/me` - Get current user information (requires authentication)
+
 ### Users
 - `GET /users` - Get all users
 - `POST /users` - Create a new user
@@ -57,6 +65,20 @@ NODE_ENV=development
 - `PUT /donations/:id` - Update a donation
 - `DELETE /donations/:id` - Delete a donation
 - `GET /donations/donor/:donorId` - Get donations by donor
+
+### Projects (Protected Routes)
+- `GET /projects` - Get all projects
+- `POST /projects` - Create a new project (requires authentication)
+- `PUT /projects/:id` - Update a project (requires authentication)
+- `DELETE /projects/:id` - Delete a project
+- `GET /projects/manager/:managerId` - Get projects by manager
+
+### Events (Protected Routes)
+- `GET /events` - Get all events
+- `POST /events` - Create a new event (requires authentication)
+- `PUT /events/:id` - Update an event (requires authentication)
+- `DELETE /events/:id` - Delete an event
+- `GET /events/organizer/:organizerId` - Get events by organizer
 
 ## API Documentation & Testing
 
@@ -77,8 +99,11 @@ The Swagger UI allows you to:
 
 **Testing Workflow:**
 1. Create a user first using `POST /users`
-2. Copy the returned `_id` from the response
-3. Use that `_id` as `donorId` when creating donations via `POST /donations`
+2. Login using `POST /auth/login` to get a JWT token
+3. Copy the returned `token` from the response
+4. Use that `_id` as `donorId` when creating donations via `POST /donations`
+5. Use the token in the Authorization header for protected routes (Projects and Events)
+6. Click the "Authorize" button in Swagger UI and enter `Bearer your-token-here`
 
 ## Data Models
 
@@ -107,11 +132,76 @@ The Swagger UI allows you to:
 }
 ```
 
+### Project
+```javascript
+{
+  name: String (required, max: 100),
+  description: String (required, max: 500),
+  startDate: Date (required),
+  endDate: Date (required),
+  budget: Number (required, min: 0),
+  targetAmount: Number (required, min: 0),
+  status: String (enum: ['planning', 'active', 'on-hold', 'completed', 'cancelled'], default: 'planning'),
+  managerId: ObjectId (ref: User, required),
+  location: String (optional, max: 200),
+  category: String (enum: ['education', 'healthcare', 'environment', 'community', 'emergency', 'other'], required),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Event
+```javascript
+{
+  name: String (required, max: 100),
+  description: String (required, max: 500),
+  date: Date (required, future date),
+  endDate: Date (required, after start date),
+  location: String (required, max: 200),
+  organizerId: ObjectId (ref: User, required),
+  type: String (enum: ['fundraiser', 'volunteer', 'workshop', 'conference', 'community', 'awareness', 'other'], required),
+  status: String (enum: ['planned', 'active', 'completed', 'cancelled', 'postponed'], default: 'planned'),
+  maxAttendees: Number (optional, 1-10000),
+  currentAttendees: Number (default: 0, max: maxAttendees),
+  registrationDeadline: Date (required, before event date),
+  entryFee: Number (default: 0, min: 0),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## Authentication
+
+The API uses JWT (JSON Web Token) authentication for protected routes:
+
+### Getting Started with Authentication
+
+1. **Create a User** (POST /users)
+2. **Login** (POST /auth/login) with email and password to receive a JWT token
+3. **Use the Token** in the Authorization header as `Bearer your-token-here`
+
+### Protected Routes
+
+The following routes require authentication:
+- `POST /projects` - Create project
+- `PUT /projects/:id` - Update project
+- `POST /events` - Create event
+- `PUT /events/:id` - Update event
+- `GET /auth/me` - Get current user info
+
+### Role-Based Access
+
+- **Admin**: Full access to all routes
+- **Volunteer**: Can manage projects and events
+- **Donor**: Read-only access to public routes
+
 ## Error Handling
 
 The API includes comprehensive error handling:
 
 - `400 Bad Request` - Invalid input data
+- `401 Unauthorized` - Authentication required or invalid token
+- `403 Forbidden` - Insufficient permissions
 - `404 Not Found` - Resource not found
 - `500 Internal Server Error` - Server errors
 
@@ -121,6 +211,37 @@ To run in development mode:
 ```bash
 npm run dev
 ```
+
+## Testing
+
+The API includes comprehensive unit tests using Jest and MongoDB Memory Server:
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+### Test Structure
+
+- **Unit Tests**: Test individual route handlers and middleware
+- **In-Memory Database**: Uses MongoDB Memory Server for isolated testing
+- **Mocked Dependencies**: Models are mocked to test route logic independently
+
+### Test Files
+
+- `tests/users.test.js` - User routes testing
+- `tests/donations.test.js` - Donation routes testing
+- `tests/projects.test.js` - Project routes testing
+- `tests/events.test.js` - Event routes testing
+- `tests/setup.js` - Test database configuration and cleanup
 
 ## Deployment
 

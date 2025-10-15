@@ -6,6 +6,9 @@ require('dotenv').config();
 
 const swaggerDocument = require('./swagger');
 
+// Import auth middleware
+const { authenticateToken } = require('./middleware/auth');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -45,9 +48,15 @@ app.get('/', (req, res) => {
 // Routes
 const userRoutes = require('./routes/users');
 const donationRoutes = require('./routes/donations');
+const projectRoutes = require('./routes/projects');
+const eventRoutes = require('./routes/events');
+const authRoutes = require('./routes/auth');
 
 app.use('/users', userRoutes);
 app.use('/donations', donationRoutes);
+app.use('/projects', projectRoutes);
+app.use('/events', eventRoutes);
+app.use('/auth', authRoutes);
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

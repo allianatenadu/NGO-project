@@ -11,6 +11,8 @@ const User = require('../models/User');
  *       required:
  *         - name
  *         - email
+ *         - password
+ *         - passwordConfirm
  *         - role
  *       properties:
  *         name:
@@ -20,6 +22,13 @@ const User = require('../models/User');
  *           type: string
  *           format: email
  *           description: User's email address
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           description: User's password (minimum 6 characters)
+ *         passwordConfirm:
+ *           type: string
+ *           description: Password confirmation (must match password)
  *         role:
  *           type: string
  *           enum: [donor, volunteer, admin]
@@ -95,12 +104,19 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { name, email, role } = req.body;
+    const { name, email, password, passwordConfirm, role } = req.body;
 
     // Validation
-    if (!name || !email || !role) {
+    if (!name || !email || !password || !passwordConfirm || !role) {
       return res.status(400).json({
-        error: 'Missing required fields: name, email, and role are required'
+        error: 'Missing required fields: name, email, password, passwordConfirm, and role are required'
+      });
+    }
+
+    // Check if passwords match
+    if (password !== passwordConfirm) {
+      return res.status(400).json({
+        error: 'Passwords do not match'
       });
     }
 
@@ -119,6 +135,7 @@ router.post('/', async (req, res) => {
     const user = new User({
       name: name.trim(),
       email: email.toLowerCase().trim(),
+      password,
       role
     });
 
@@ -189,7 +206,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, role } = req.body;
+    const { name, email, password, role } = req.body;
 
     // Validation
     if (!name || !email || !role) {
@@ -220,13 +237,21 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Email is already taken by another user' });
     }
 
+    // Prepare update object
+    const updateData = {
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      role
+    };
+
+    // Only include password if it's being updated
+    if (password) {
+      updateData.password = password;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      {
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        role
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
