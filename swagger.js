@@ -30,6 +30,42 @@ const options = {
             "JWT Authorization header using the Bearer scheme. Enter your token in the text input below.",
         },
       },
+      schemas: {
+        User: {
+          type: "object",
+          required: ["name", "email", "role"],
+          properties: {
+            _id: {
+              type: "string",
+              description: "Unique identifier for the user",
+            },
+            name: {
+              type: "string",
+              description: "User full name",
+            },
+            email: {
+              type: "string",
+              format: "email",
+              description: "User email address",
+            },
+            role: {
+              type: "string",
+              enum: ["donor", "volunteer", "admin"],
+              description: "User role in the NGO",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "User creation date",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "User last update date",
+            },
+          },
+        },
+      },
     },
     security: [
       {
