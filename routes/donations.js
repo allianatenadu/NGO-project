@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { amount, donorId, projectId, description } = req.body;
+    const { amount, donorId, projectId, description, status } = req.body;
 
     // Validation
     if (!amount || !donorId || !projectId) {
@@ -131,21 +131,71 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // Validate status if provided
+    if (status && !['pending', 'completed', 'cancelled'].includes(status)) {
+      return res.status(400).json({
+        error: 'Invalid status. Status must be either pending, completed, or cancelled'
+      });
+    }
+
     // Check if donor exists
-    const donor = await User.findById(donorId);
+    let donor;
+    try {
+      donor = await User.findById(donorId);
+    } catch (error) {
+      console.error('Database query error:', error);
+      if (error.name === 'MongooseError' && error.message.includes('buffering timed out')) {
+        return res.status(503).json({
+          error: 'Database connection timeout. Please try again later.'
+        });
+      }
+      throw error; // Re-throw to be caught by outer catch block
+    }
+
     if (!donor) {
       return res.status(404).json({ error: 'Donor not found' });
+    }
+
+    // Validate status if provided
+    if (req.body.status && !['pending', 'completed', 'cancelled'].includes(req.body.status)) {
+      return res.status(400).json({
+        error: 'Invalid status. Status must be either pending, completed, or cancelled'
+      });
     }
 
     const donation = new Donation({
       amount: Number(amount),
       donorId,
       projectId: projectId.trim(),
-      description: description ? description.trim() : undefined
+      description: description ? description.trim() : undefined,
+      status: status || 'pending'
     });
 
-    const savedDonation = await donation.save();
-    const populatedDonation = await Donation.findById(savedDonation._id).populate('donorId', 'name email');
+    let savedDonation;
+    try {
+      savedDonation = await donation.save();
+    } catch (error) {
+      console.error('Error saving donation:', error);
+      if (error.name === 'MongooseError' && error.message.includes('buffering timed out')) {
+        return res.status(503).json({
+          error: 'Database connection timeout. Please try again later.'
+        });
+      }
+      throw error;
+    }
+
+    let populatedDonation;
+    try {
+      populatedDonation = await Donation.findById(savedDonation._id).populate('donorId', 'name email');
+    } catch (error) {
+      console.error('Error populating donation:', error);
+      if (error.name === 'MongooseError' && error.message.includes('buffering timed out')) {
+        return res.status(503).json({
+          error: 'Database connection timeout. Please try again later.'
+        });
+      }
+      throw error;
+    }
 
     res.status(201).json(populatedDonation);
   } catch (error) {
@@ -158,6 +208,14 @@ router.post('/', async (req, res) => {
 
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid donor ID format' });
+    }
+
+    if (error.name === 'MongooseError') {
+      if (error.message.includes('buffering timed out') || error.message.includes('connection')) {
+        return res.status(503).json({
+          error: 'Database connection issue. Please try again later.'
+        });
+      }
     }
 
     res.status(500).json({ error: 'Failed to create donation' });

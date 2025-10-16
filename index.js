@@ -33,11 +33,16 @@ mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected successfully'))
+.then(() => {
+  console.log('MongoDB connected successfully');
+  console.log(`Connected to: ${mongoUri.replace(/\/\/.*@/, '//***:***@')}`); // Hide credentials in logs
+})
 .catch(err => {
   console.error('MongoDB connection error:', err.message);
+  console.error('Full error:', err);
   console.log('Server will continue running without database connection');
   console.log('Please ensure MongoDB is running or set MONGO_URI environment variable');
+  console.log('For Render deployment, make sure MONGO_URI environment variable is set correctly');
 });
 
 // Basic route
